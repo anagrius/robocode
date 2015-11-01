@@ -1,0 +1,17 @@
+.code-editor {
+  background: black;
+  color: white;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: stretch;
+}
+
+.code-editor__canvas {
+  background: black;
+  color: white;
+  flex: 1 1 auto;
+}
+
+.code-editor__canvas:focus {
+  outline: none;
+}

@@ -1,0 +1,22 @@
+.page {
+  display: flex;
+  align-items: stretch;
+}
+
+.page__editor {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.page__editor-content {
+  flex: 1 1 auto;
+  height: 100%;
+  display: flex;
+}
+
+.page__editor-buttons {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+}
