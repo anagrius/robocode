@@ -3,7 +3,7 @@ import {toCoords} from '../board';
 
 require('./renderer.css')
 
-const boardSize = 600;
+const boardSize = 500;
 
 function renderCell(tileSize, {x, y}, robotId) {
   const robot = (robotId !== null) ? (

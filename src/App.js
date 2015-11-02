@@ -58,7 +58,7 @@ export class App extends Component {
   render() {
     return (
       <div>
-        <h1>Robocode | Death Robot Operating System</h1>
+        <h1 className="title">Robocode <span className="title__tail">Lovingly Coded Killing Machines</span></h1>
         <div className="page">
           <Board className="page__board" game={this.state.game} />
           <div className="page__editor">
@@ -66,13 +66,13 @@ export class App extends Component {
               <CodeEditor ref="editor" code={this.code} />
             </div>
             <div className="page__editor-buttons">
-              <button type="button" onClick={this.uploadAI.bind(this)}>Upload AI</button>
               <select onChange={this.selectRobot.bind(this)} ref="robotSelector">
                 <option value={0}>0</option>
                 <option value={1}>1</option>
                 <option value={2}>2</option>
                 <option value={3}>3</option>
               </select>
+              <button type="button" className="upload-button" onClick={this.uploadAI.bind(this)}>Deploy AI ⌘↵</button>
             </div>
           </div>
         </div>

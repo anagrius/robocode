@@ -1,6 +1,20 @@
+body {
+  background-color: #0C141F;
+}
+
 .page {
   display: flex;
   align-items: stretch;
+}
+
+.title {
+  color: #6BC3E1;
+  text-align: center;
+  font-family: "bd-geminis";
+}
+
+.title__tail {
+  color: #E17400;
 }
 
 .page__editor {
@@ -19,4 +33,14 @@
   flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.upload-button {
+  background-color: #FFE83A;
+  border: solid 1px #E17400;
+  color: black;
+  padding: 10px 30px;
+  font-size: 30px;
 }

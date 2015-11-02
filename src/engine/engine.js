@@ -66,6 +66,7 @@ function prepareRobotForPlayer(game, robot) {
     id: robot.id,
     x: pos.x,
     y: pos.y,
+    health: 100
   };
 }
 
@@ -74,7 +75,7 @@ function robotTurn(game, robot) {
   let robotAction = null;
 
   const myRobotForPlayer = prepareRobotForPlayer(game, robot);
-  const otherRobotsForPlayer = game.robots.delete(robot.id).valueSeq().map(r => prepareRobotForPlayer(game, r)).toList().remove();
+  const otherRobotsForPlayer = game.robots.delete(robot.id).valueSeq().map(r => prepareRobotForPlayer(game, r)).toList();
 
   // try {
     robotAction = eval(`(${robot.ai})`).call(null, myRobotForPlayer, otherRobotsForPlayer);

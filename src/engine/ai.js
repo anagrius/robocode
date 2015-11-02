@@ -60,8 +60,6 @@ export function moveToNearestEnemy(myRobot, otherRobots) {
 
   // TODO: Naive implementation, we should use the diagonal for the path.
 
-  console.log(`${myRobot.id} = (${myRobot.x}, ${myRobot.y}), ${target.id} = (${target.x}, ${target.y})`)
-
   if (target.x > myRobot.x) {
     console.log("move r")
     return moveRight();
