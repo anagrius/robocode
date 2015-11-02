@@ -16,7 +16,7 @@ const Directions = {
   DOWN: "DOWN"
 };
 
-export function move(game, robotId, direction) {
+function move(game, robotId, direction) {
   const {board} = game;
   const coords = board.positionOf(robotId);
   const {x, y} = coords;
@@ -44,7 +44,7 @@ export function move(game, robotId, direction) {
     case Directions.DOWN:
       const currentValueDown = board.valueAt(x, y + 1);
       if (y !== game.boardSize - 1 && currentValueDown === null) {
-        newCoods = {x, y: y + 1};
+        newCoords = {x, y: y + 1};
       }
       break;
     default:
@@ -61,7 +61,7 @@ export function move(game, robotId, direction) {
   }
 }
 
-export function dispatch(game, action) {
+function dispatch(game, action) {
   switch (action.action) {
     case Actions.MOVE:
       return move(game, action.robotId, action.direction);
@@ -74,5 +74,7 @@ export function dispatch(game, action) {
 }
 
 export default {
-  dispatch
+  dispatch,
+  Actions,
+  Directions
 };

@@ -10,8 +10,10 @@
   background: black;
   color: white;
   flex: 1 1 auto;
+  overflow: auto;
 }
 
-.code-editor__canvas:focus {
-  outline: none;
+.code-editor .CodeMirror {
+  height: auto;
+  min-width: 100%;
 }

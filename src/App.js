@@ -29,21 +29,30 @@ export class App extends Component {
 
     engine.run(game, onGameTick, getInput);
 
-    this.state = {game};
+    this.state = {game, robotId: 0};
 
     document.addEventListener("keydown", (e) => {
       const D_KEY = 68;
+      const ENTER_KEY = 13;
+
       if (e.keyCode === D_KEY) {
         console.log(this.state.game.toJS());
+      }
+      else if ((e.metaKey || e.ctrlKey) && e.keyCode === ENTER_KEY) {
+        this.uploadAI();
       }
     });
   }
 
   uploadAI() {
-    const robotId = 0;
+    const robotId = +this.state.robotId;
     const code = this.refs.editor.getValue();
     const action = ui.updateRobotAI(robotId, code);
     this.actions.push(action);
+  }
+
+  selectRobot() {
+    this.setState({robotId: this.refs.robotSelector.value});
   }
 
   render() {
@@ -58,6 +67,12 @@ export class App extends Component {
             </div>
             <div className="page__editor-buttons">
               <button type="button" onClick={this.uploadAI.bind(this)}>Upload AI</button>
+              <select onChange={this.selectRobot.bind(this)} ref="robotSelector">
+                <option value={0}>0</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+              </select>
             </div>
           </div>
         </div>

@@ -26,7 +26,6 @@ const Board = Record({
   },
   positionOf: function(id) {
     const index = this.tiles.indexOf(id);
-    console.log("ind", index);
     return index === -1 ? null : toCoords(this, index);
   }
 });

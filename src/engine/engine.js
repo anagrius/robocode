@@ -1,7 +1,8 @@
-import {times, reduce} from 'lodash';
+import {times, reduce, partial} from 'lodash';
 import {createBoard} from './board';
 import actions from './actions';
 import {Record, List, fromJS, Map} from 'immutable';
+var AI = require('./ai');
 
 var Actions = {
   MOVE: "MOVE",
@@ -59,19 +60,32 @@ function createGame(boardSize, robotCount) {
   return new Game({boardSize, robots, board});
 }
 
+function prepareRobotForPlayer(game, robot) {
+  const pos = game.board.positionOf(robot.id);
+  return {
+    id: robot.id,
+    x: pos.x,
+    y: pos.y,
+  };
+}
+
 function robotTurn(game, robot) {
   // TODO: Execute in a vm on the server.
   let robotAction = null;
-  try {
-    robotAction = eval(`(${robot.ai})()`);
+
+  const myRobotForPlayer = prepareRobotForPlayer(game, robot);
+  const otherRobotsForPlayer = game.robots.delete(robot.id).valueSeq().map(r => prepareRobotForPlayer(game, r)).toList().remove();
+
+  // try {
+    robotAction = eval(`(${robot.ai})`).call(null, myRobotForPlayer, otherRobotsForPlayer);
     // TODO: Make a test that ensures you can't set the robotId in an AI script.
     robotAction.robotId = robot.id;
-  }
-  catch (e) {
-    console.log("AI Failed: " + e.message);
-    // If an AI fails.
-    return game;
-  }
+  // }
+  // catch (e) {
+  //   console.log("AI Failed: " + e.message);
+  //   // If an AI fails.
+  //   return game;
+  // }
 
   return actions.dispatch(game, robotAction);
 }
