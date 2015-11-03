@@ -54,5 +54,6 @@ $size: 500px;
   top: -10  px;
   height: 5px;
   background-color: green;
+  color: lime;
   border: solid 1px black;
 }

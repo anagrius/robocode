@@ -1,57 +1,16 @@
 import {List} from 'immutable';
 import {sample} from 'lodash';
-import {valueAt} from './board';
+import ActionTypes from './action_types';
+import Directions from './directions';
 
-const Actions = {
-  MOVE: "MOVE",
-  CHARGE_SHIELD: "CHARGE_SHIELD",
-  ATTACK: "ATTACK",
-  IDLE: "IDLE"
-};
-
-const Directions = {
-  LEFT: "LEFT",
-  RIGHT: "RIGHT",
-  UP: "UP",
-  DOWN: "DOWN"
-};
-
-function move(game, robotId, direction) {
+function move(game, {robotId, direction}) {
   const {board} = game;
   const coords = board.positionOf(robotId);
   const {x, y} = coords;
 
-  let newCoords = null;
-  switch(direction) {
-    case Directions.RIGHT:
-      const currentValueRight = board.valueAt(x + 1, y);
-      if (x !== game.boardSize - 1 && currentValueRight === null) {
-        newCoords = {x: x + 1, y};
-      }
-      break;
-    case Directions.LEFT:
-      const currentValueLeft = board.valueAt(x - 1, y);
-      if (x !== 0 && currentValueLeft === null) {
-        newCoords = {x: x - 1, y};
-      }
-      break;
-    case Directions.UP:
-      const currentValueUp = board.valueAt(x, y - 1);
-      if (y !== 0 && currentValueUp === null) {
-        newCoords = {x, y: y - 1};
-      }
-      break;
-    case Directions.DOWN:
-      const currentValueDown = board.valueAt(x, y + 1);
-      if (y !== game.boardSize - 1 && currentValueDown === null) {
-        newCoords = {x, y: y + 1};
-      }
-      break;
-    default:
-      throw new Error(`Unknown direction '${direction}'`);
-  }
+  const newCoords = board.getAdjacentCell(x, y, direction);
 
-  if (newCoords) {
+  if (newCoords && board.isCellEmpty(newCoords.x, newCoords.y)) {
     return game.update("board", b => b.place(null, x, y).place(robotId, newCoords.x, newCoords.y));
   }
   else {
@@ -61,20 +20,48 @@ function move(game, robotId, direction) {
   }
 }
 
+function decreaseRobotHealth(game, robotId, health) {
+  return game.updateIn(['robots', robotId, 'health'], h => {
+    return h - health;
+  });
+}
+
+function attack(game, {robotId, direction}) {
+  const {board} = game;
+  const {x, y} = board.positionOf(robotId);
+  const cell = board.getAdjacentCell(x, y, direction);
+
+  if (cell !== null && !board.isCellEmpty(cell.x, cell.y)) {
+    const otherRobotId = board.valueAt(cell.x, cell.y);
+    return decreaseRobotHealth(game, otherRobotId, 2);
+  }
+  else {
+    return game;
+  }
+}
+
+export function idle(game, action) {
+  return game;
+}
+
 function dispatch(game, action) {
-  switch (action.action) {
-    case Actions.MOVE:
-      return move(game, action.robotId, action.direction);
-    case Actions.IDLE:
+  const fns = {
+    [ActionTypes.MOVE]: move,
+    [ActionTypes.ATTACK]: attack,
+    [ActionTypes.IDLE]: idle
+  };
+
+  const actionFn = fns[action.action];
+
+  if (actionFn) {
+    return actionFn(game, action);
+  }
+  else {
+      console.warn(`Unknown action "${action.action}"`);
       return game;
-    default:
-      throw new Error(`Unknown action "${action.action}"`);
-      break;
   };
 }
 
 export default {
-  dispatch,
-  Actions,
-  Directions
+  dispatch
 };

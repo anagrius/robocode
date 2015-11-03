@@ -16,4 +16,6 @@
 .code-editor .CodeMirror {
   height: auto;
   min-width: 100%;
+  font-family: Hack, monospace;
+  font-size: 13px;
 }

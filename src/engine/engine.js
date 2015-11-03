@@ -1,22 +1,8 @@
 import {times, reduce, partial} from 'lodash';
-import {createBoard} from './board';
+import {createBoard} from './boards';
 import actions from './actions';
 import {Record, List, fromJS, Map} from 'immutable';
-var AI = require('./ai');
-
-var Actions = {
-  MOVE: "MOVE",
-  CHARGE_SHIELD: "CHARGE_SHIELD",
-  ATTACK: "ATTACK",
-  IDLE: "IDLE"
-};
-
-var Directions = {
-  LEFT: "LEFT",
-  RIGHT: "RIGHT",
-  UP: "UP",
-  DOWN: "DOWN"
-};
+import * as AI from './ai';
 
 const nextId = 0;
 function genId() {
@@ -25,17 +11,24 @@ function genId() {
 
 const Robot = Record({
   id: null,
-  ai: require("raw!../programs/default.txt")
+  ai: require("raw!../programs/default.txt"),
+  health: 100
 });
 
 function createRobot(id = genId()) {
   return new Robot({id});
 }
 
+const GameStatus = {
+  RUNNING: "RUNNING",
+  FINISHED: "FINISHED"
+};
+
 const Game = Record({
   robots: [],
   board: null,
-  boardSize: 0
+  boardSize: 0,
+  status: GameStatus.RUNNING
 });
 
 function createGame(boardSize, robotCount) {
@@ -66,8 +59,30 @@ function prepareRobotForPlayer(game, robot) {
     id: robot.id,
     x: pos.x,
     y: pos.y,
-    health: 100
+    health: robot.health
   };
+}
+
+function removeDeadRobots(game) {
+  return game.robots.valueSeq().reduce((game, robot) => {
+    if (robot.health > 0) {
+      return game;
+    }
+    else {
+      const pos = game.board.positionOf(robot.id);
+      game = game.deleteIn(['robots', robot.id]);
+      game = game.update('board', b => b.place(null, pos.x, pos.y));
+      return game;
+    }
+  }, game);
+}
+
+function checkEndCondition(game) {
+  console.log("GAME", game);
+  // Could be ZERO or ONE robot left.
+  return game.robots.count() >= 2 ?
+    game :
+    game.set('status', GameStatus.FINISHED);
 }
 
 function robotTurn(game, robot) {
@@ -97,11 +112,19 @@ export function run(initialGame, onGameTick, getInput) {
 
   let game = initialGame;
 
+  const conditions = [
+    removeDeadRobots,
+    checkEndCondition
+  ];
+
   const gameLoop = () => {
     // User Input
     game = getInput().reduce(uiAction, game);
     // AI - TODO: Do round robin of which robot goes first.
     game = game.robots.valueSeq().reduce(robotTurn, game);
+    // Check Conditions
+    console.log(game);
+    game = conditions.reduce((game, condition) => condition(game), game);
     // Output
     onGameTick(game);
   };

@@ -1,14 +1,14 @@
 import React from 'react';
-import {toCoords} from '../board';
+import {toCoords} from '../boards';
 
 require('./renderer.css')
 
 const boardSize = 500;
 
-function renderCell(tileSize, {x, y}, robotId) {
+function renderCell(game, tileSize, {x, y}, robotId) {
   const robot = (robotId !== null) ? (
     <div className="robot">
-      <div className="robot__health">{robotId}</div>
+      <div className="robot__health">{game.robots.get(robotId).health}</div>
       <img className="robot__img" src={require(`./images/robot-${robotId+1}.svg`)} />
     </div>
   ) : <div>({x},{y})</div>;
@@ -33,7 +33,7 @@ export default function render(game) {
     <div className={boardClass}>
       {board.tiles.map((tileValue, idx) => {
         const coords = toCoords(board, idx);
-        return renderCell(cellWidth, coords, tileValue);
+        return renderCell(game, cellWidth, coords, tileValue);
       })}
       <div className="board__fight">Fight!</div>
     </div>

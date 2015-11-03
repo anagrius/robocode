@@ -1,1 +1,1 @@
-function() { return { action: Actions.IDLE }; }
+function() { return AI.idle(); }

@@ -1,4 +1,5 @@
-import {Actions, Directions} from './actions';
+import ActionTypes from './action_types';
+import Dirs from './directions';
 import {sample, partial} from 'lodash';
 import {List} from 'immutable';
 
@@ -7,35 +8,35 @@ export function createAction(action, payload = {}) {
 }
 
 function doNothing() {
-  return createAction(Actions.IDLE);
+  return createAction(ActionTypes.IDLE);
 }
 
 function moveLeft() {
-  return createAction(Actions.MOVE, {direction: Directions.LEFT});
+  return createAction(ActionTypes.MOVE, {direction: Dirs.WEST});
 }
 
 function moveRight() {
-  return createAction(Actions.MOVE, {direction: Directions.RIGHT});
+  return createAction(ActionTypes.MOVE, {direction: Dirs.EAST});
 }
 
 function moveUp() {
-  return createAction(Actions.MOVE, {direction: Directions.UP});
+  return createAction(ActionTypes.MOVE, {direction: Dirs.NORTH});
 }
 
 function moveDown() {
-  return createAction(Actions.MOVE, {direction: Directions.DOWN});
+  return createAction(ActionTypes.MOVE, {direction: Dirs.SOUTH});
 }
 
 export function moveRandomly() {
-  return createAction(Actions.MOVE, {direction: sample(Directions)});
+  return createAction(ActionTypes.MOVE, {direction: sample(Dirs)});
 }
 
 export function chargeShield() {
-  return createAction(Actions.CHARGE_SHIELD);
+  return createAction(ActionTypes.CHARGE_SHIELD);
 }
 
 export function attackRandomly() {
-  return createAction(Actions.ATTACK, {direction: sample(Directions)});
+  return createAction(ActionTypes.ATTACK, {direction: sample(Dirs)});
 }
 
 export function randomAction() {
@@ -47,35 +48,81 @@ export function randomAction() {
   return sample(randomActions)();
 }
 
-function distanceBetween(robotA, robotB) {
-  const A = Math.pow(robotA.x - robotB.x, 2);
-  const B = Math.pow(robotA.y - robotB.y, 2);
-  const distance = Math.sqrt(A + B);
-  return distance;
+export function distanceBetween(robotA, robotB) {
+  // Diagonals count as 1.
+  return Math.max(Math.abs(robotA.x - robotB.x), Math.abs(robotA.y - robotB.y));
+}
+
+export function isEnemyAdjecent(robot, enemy) {
+  const distance = distanceBetween(robot, enemy);
+  return distance === 1;
+}
+
+export function getDirectionTo(robot, enemy) {
+
+  if (robot.x > enemy.x && robot.y > enemy.y) {
+    return Dirs.NORTH_WEST;
+  }
+  else if (robot.x > enemy.x && robot.y < enemy.y) {
+    return Dirs.SOUTH_WEST;
+  }
+  else if (robot.x < enemy.x && robot.y < enemy.y) {
+    return Dirs.SOUTH_EAST;
+  }
+  else if (robot.x < enemy.x && robot.y > enemy.y) {
+    return Dirs.NORTH_EAST;
+  }
+  else if (robot.x > enemy.x) {
+    return Dirs.WEST;
+  }
+  else if (robot.x < enemy.x) {
+    return Dirs.EAST;
+  }
+  else if (robot.y > enemy.y) {
+    return Dirs.NORTH;
+  }
+  else if (robot.y < enemy.y) {
+    return Dirs.SOUTH;
+  }
+  else {
+    return null;
+  }
+}
+
+export function getAdjecentEnemy(robot, enemies) {
+  const predicate = partial(isEnemyAdjecent, robot);
+  return new List(enemies).find(predicate) || null;
+}
+
+export function isNextToEnemy(robot, enemies) {
+  const enemy = getAdjecentEnemy(robot, enemies);
+  return enemy !== null;
+}
+
+export function attackAdjacentEnemy(robot, enemies) {
+  const enemy = getAdjecentEnemy(robot, enemies);
+  if (enemy) {
+    const direction = getDirectionTo(robot, enemy);
+    return createAction(ActionTypes.ATTACK, {direction});
+  }
+  else {
+    return attackRandomly();
+  }
 }
 
 export function moveToNearestEnemy(myRobot, otherRobots) {
+  if (otherRobots.count() === 0) return idle();
+
   const distanceToMe = partial(distanceBetween, myRobot);
   const target = new List(otherRobots).minBy(distanceToMe);
 
-  // TODO: Naive implementation, we should use the diagonal for the path.
+  const direction = getDirectionTo(myRobot, target);
 
-  if (target.x > myRobot.x) {
-    console.log("move r")
-    return moveRight();
-  }
-  else if (target.x < myRobot.x) {
-    console.log("move l")
-    return moveLeft();
-  }
-  else if (target.y < myRobot.y) {
-    console.log("move d")
-    return moveUp();
-  }
-  else {
-    console.log("move u")
-    return moveDown();
-  }
+  return createAction(ActionTypes.MOVE, {direction});
+}
+
+export function idle() {
+  return createAction(ActionTypes.IDLE);
 }
 
 export default {
@@ -83,5 +130,9 @@ export default {
   attackRandomly,
   chargeShield,
   moveRandomly,
-  moveToNearestEnemy
+  moveToNearestEnemy,
+  attackAdjacentEnemy,
+  isNextToEnemy,
+  getDirectionTo,
+  idle
 };
