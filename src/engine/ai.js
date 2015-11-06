@@ -35,8 +35,12 @@ export function chargeShield() {
   return createAction(ActionTypes.CHARGE_SHIELD);
 }
 
+export function attack(direction) {
+  return createAction(ActionTypes.ATTACK, {direction});
+}
+
 export function attackRandomly() {
-  return createAction(ActionTypes.ATTACK, {direction: sample(Dirs)});
+  return attack(sample(Dirs));
 }
 
 export function randomAction() {
@@ -59,33 +63,30 @@ export function isEnemyAdjecent(robot, enemy) {
 }
 
 export function getDirectionTo(robot, enemy) {
+  const isLeftOfEnemy = robot.x > enemy.x;
+  const isRightOfEnemy = robot.x < enemy.x;
+  const isBelowOfEnemy = robot.y > enemy.y;
+  const isAboveOfEnemy = robot.y < enemy.y;
 
-  if (robot.x > enemy.x && robot.y > enemy.y) {
-    return Dirs.NORTH_WEST;
-  }
-  else if (robot.x > enemy.x && robot.y < enemy.y) {
-    return Dirs.SOUTH_WEST;
-  }
-  else if (robot.x < enemy.x && robot.y < enemy.y) {
-    return Dirs.SOUTH_EAST;
-  }
-  else if (robot.x < enemy.x && robot.y > enemy.y) {
-    return Dirs.NORTH_EAST;
-  }
-  else if (robot.x > enemy.x) {
+  if (isLeftOfEnemy) {
+    if (isBelowOfEnemy) return Dirs.NORTH_WEST;
+    if (isAboveOfEnemy) return Dirs.SOUTH_WEST;
     return Dirs.WEST;
   }
-  else if (robot.x < enemy.x) {
+  else if (isRightOfEnemy) {
+    if (isAboveOfEnemy) return Dirs.SOUTH_EAST;
+    if (isBelowOfEnemy) return Dirs.NORTH_EAST;
     return Dirs.EAST;
   }
-  else if (robot.y > enemy.y) {
-    return Dirs.NORTH;
-  }
-  else if (robot.y < enemy.y) {
+  else if (isAboveOfEnemy) {
     return Dirs.SOUTH;
   }
+  else if (isBelowOfEnemy) {
+    return Dirs.NORTH;
+  }
   else {
-    return null;
+    // target === destination, no direction
+    return null
   }
 }
 

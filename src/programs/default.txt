@@ -1,1 +1,3 @@
-function() { return AI.idle(); }
+function act(robot, enemies) {
+  return AI.moveRandomly();
+}

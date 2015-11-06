@@ -33,7 +33,7 @@ function attack(game, {robotId, direction}) {
 
   if (cell !== null && !board.isCellEmpty(cell.x, cell.y)) {
     const otherRobotId = board.valueAt(cell.x, cell.y);
-    return decreaseRobotHealth(game, otherRobotId, 2);
+    return decreaseRobotHealth(game, otherRobotId, 1);
   }
   else {
     return game;
