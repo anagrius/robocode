@@ -2,7 +2,7 @@ import {times, reduce, partial} from 'lodash';
 import {createBoard} from './boards';
 import actions from './actions';
 import {Record, List, fromJS, Map} from 'immutable';
-import * as AI from './ai';
+import * as ai from './ai';
 
 const nextId = 0;
 function genId() {
@@ -11,7 +11,7 @@ function genId() {
 
 const Robot = Record({
   id: null,
-  ai: require("raw!../programs/default.txt"),
+  ai: 'function() { return AI.idle(); }',
   health: 100
 });
 
@@ -31,7 +31,7 @@ const Game = Record({
   status: GameStatus.RUNNING
 });
 
-function createGame(boardSize, robotCount) {
+export function createGame(boardSize, robotCount) {
   const robots = new Map(times(robotCount, createRobot).map(robot => [robot.id, robot]));
   let board = createBoard(boardSize, robotCount);
 
@@ -44,6 +44,9 @@ function createGame(boardSize, robotCount) {
       board = board.place(robots.get(1).id, boardSize - 1, boardSize - 1);
     case 1:
       board = board.place(robots.get(0).id, 0, 0);
+      break;
+    case 0:
+      // For testing mainly. Simulate a Draw.
       break;
     default:
       throw Error("invalid argument: 0 < robotCount <= 4");
@@ -78,7 +81,6 @@ function removeDeadRobots(game) {
 }
 
 function checkEndCondition(game) {
-  console.log("GAME", game);
   // Could be ZERO or ONE robot left.
   return game.robots.count() >= 2 ?
     game :
@@ -93,14 +95,15 @@ function robotTurn(game, robot) {
   const otherRobotsForPlayer = game.robots.delete(robot.id).valueSeq().map(r => prepareRobotForPlayer(game, r)).toList();
 
   // try {
+    const AI = ai.createAI(game.board, myRobotForPlayer, otherRobotsForPlayer);
     robotAction = eval(`(${robot.ai})`).call(null, myRobotForPlayer, otherRobotsForPlayer);
     // TODO: Make a test that ensures you can't set the robotId in an AI script.
     robotAction.robotId = robot.id;
   // }
   // catch (e) {
-  //   console.log("AI Failed: " + e.message);
-  //   // If an AI fails.
-  //   return game;
+  //    console.warn("AI Failed: " + e.message);
+  //    // If an AI fails, make the robot idle.
+  //    return actions.dispatch(game, ai.idle());
   // }
 
   return actions.dispatch(game, robotAction);
@@ -108,7 +111,19 @@ function robotTurn(game, robot) {
 
 const uiAction = (game, action) => action(game);
 
-export function run(initialGame, onGameTick, getInput) {
+export function getRobot(gameState, idx) {
+  return gameState.robots.get(idx);
+}
+
+/**
+ * Runs one initial game tick, but does not start the run loop.
+ * Mainly ment for testing.
+ */
+export function runOnce(initialGame, onGameTick = () => {}, getInput = () => []) {
+  return run(initialGame, onGameTick, getInput, true);
+}
+
+export function run(initialGame, onGameTick = () => {}, getInput = () => [], once) {
 
   let game = initialGame;
 
@@ -123,18 +138,39 @@ export function run(initialGame, onGameTick, getInput) {
     // AI - TODO: Do round robin of which robot goes first.
     game = game.robots.valueSeq().reduce(robotTurn, game);
     // Check Conditions
-    console.log(game);
     game = conditions.reduce((game, condition) => condition(game), game);
     // Output
     onGameTick(game);
   };
 
-  const speed = 2;
-  return setInterval(gameLoop, 1000 / speed);
+  // Make an initil game tick before scheduleing.
+  gameLoop();
+
+  const speed = 6;
+  return {
+    // For testing we allow just making an initial game tick.
+    id: once ? null : setInterval(gameLoop, 1000 / speed),
+    getGameState() {
+      return game;
+    }
+  };
 };
 
-export function stop(engineId) {
-  clearInterval(engineId);
+export function stop(gameHandle) {
+  clearInterval(gameHandle.id);
+}
+
+export function winner(gameState) {
+  const robotCount = gameState.robots.count();
+  if (robotCount === 0) {
+    return 'DRAW';
+  }
+  else if (robotCount === 1) {
+    return gameState.robots.valueSeq().first().id;
+  }
+  else {
+    return null;
+  }
 }
 
 export default {

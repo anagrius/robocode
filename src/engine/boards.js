@@ -1,6 +1,6 @@
 import {List, Record, Range, Repeat} from 'immutable';
 import {range, random} from 'lodash';
-import * as Dirs from './directions';
+import Dirs from './directions';
 import invariant from 'invariant';
 
 const Coordinate = Record({x: 0, y: 0});
@@ -22,19 +22,23 @@ const Board = Record({
     const size = this.boardSize;
     return (x < 0 || x >= size || y < 0 || y >= size);
   },
+
   place: function(id, x, y) {
     invariant(!this.isInBounds(x, y), `position out of bounds (${x},${y})`);
     const tile = toTileIndex(this, x, y);
     return this.update('tiles', ts => ts.set(tile, id));
   },
+
   valueAt: function(x, y) {
     const index = toTileIndex(this, x, y);
     return this.tiles.get(index);
   },
+
   positionOf: function(id) {
     const index = this.tiles.indexOf(id);
     return index === -1 ? null : toCoords(this, index);
   },
+
   getAdjacentCell(x, y, direction) {
 
     const moves = {
@@ -47,7 +51,7 @@ const Board = Record({
       [Dirs.SOUTH]: (x,y) => ({x, y: y + 1}),
       [Dirs.SOUTH_WEST]: (x,y) => ({x: x - 1, y: y + 1}),
     };
-
+    
     const newCoords = moves[direction](x,y);
 
     if (newCoords) {

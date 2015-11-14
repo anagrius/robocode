@@ -24,6 +24,45 @@ $size: 500px;
   background-color: rgba(0,0,0,0.75);
 }
 
+.board__winner {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.2s 0.4s;
+  opacity: 1;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.75);
+}
+
+.board__winner-controls {
+  margin-top: 20px;
+}
+
+
+
+.winner {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3300AD;
+  border-radius: 10px;
+  padding: 10px 40px;
+  color: white;
+  font-size: 30px;
+}
+
+.winner .robot {
+  height: 64px;
+  width: 64px;
+  margin-left: 20px;
+}
+
 .board--started .board__fight {
   opacity: 0;
 }

@@ -1,9 +1,14 @@
 import actions from '../../src/engine/actions.js';
-import * as Dirs from '../../src/engine/directions.js';
-import AI from '../../src/engine/ai.js';
+import Dirs from '../../src/engine/directions.js';
+import * as AI from '../../src/engine/ai.js';
 import {x0y0, x0y1, x1y0, x1y1} from './helpers.js'
 
 describe('AI', () => {
+  describe('#getClosestEnemy', () => {
+    it('gets the closest enemy', () => {
+      expect("Not implemented").toEqual("implemented");
+    });
+  });
 
   describe('#getDirectionTo', () => {
     it('returns a direction that leads to the point', () => {
@@ -20,7 +25,7 @@ describe('AI', () => {
 
       scenarios.forEach(([from, to, expectedDir]) => {
         const direction = AI.getDirectionTo(from, to);
-        expect(direction).toEqual(expectedDir, `(${from.x} ${from.y}) -> (${to.x}, ${to.y})`);
+        expect(direction).toEqual(expectedDir, `(${from.x} ${from.y}) -> (${to.x}, ${to.y}), got: ${direction}, expected: ${expectedDir}`);
       });
     });
 
@@ -32,7 +37,7 @@ describe('AI', () => {
 
   describe('#isEnemyAdjecent', () => {
     it('returns true if the enemy is adjecent on the diagonal', () => {
-      
+
     })
   });
 });

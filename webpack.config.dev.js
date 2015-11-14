@@ -22,14 +22,17 @@ module.exports = {
     loaders: [{
       test: /\.js$/,
       loaders: ['babel'],
-      include: path.join(__dirname, 'src')
+      include: path.join(__dirname, 'src'),
     }, {
       test:   /\.css$/,
-      loader: "style!css!postcss"
+      loader: "style!css!postcss",
     }, {
       test: /\.svg$/,
-      loader: "file"
-    }]
+      loader: "file",
+    }, {
+      test: /\.md$/,
+      loader: "raw",
+    },],
   },
   postcss: function () {
       return [autoprefixer, precss];
